@@ -11,6 +11,14 @@ load(
 
 package(default_visibility = ["//visibility:public"])
 
+drake_cc_googletest(
+    name = "executable",
+    srcs = ["executable.cc"],
+    deps = [
+        ":mathematical_program",
+    ],
+)
+
 drake_cc_library(
     name = "binding",
     srcs = [],
