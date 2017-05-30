@@ -3,6 +3,7 @@ be removed from git when the branch is commited*/
 
 #include <iostream>
 #include "mathematical_program.h"
+#include "mosek_solver.h"
 //#include "drake/common/symbolic_expression.h"
 
 using namespace drake::solvers;
@@ -13,34 +14,60 @@ namespace solvers {
 namespace executable {
 namespace {
 
-int psd_example() {
-  std::cout << "runs psd_examples" << std::endl;
+/*
+int sos_decomposition1() {
+  std::cout << "sos_decomposition1()" << std::endl;
 
-  // Create a MathematicalProgram object.
   MathematicalProgram prog;
-  // Add a 2 x 2 symmetric matrix S to optimization program as new decision
-  // variables.
-  auto S = prog.NewSymmetricContinuousVariables<2>("S");
-  // Impose a positive semidefinite constraint on S.
-  auto psd_constraint = prog.AddPositiveSemidefiniteConstraint(S);
-  // Add more constraints to make the program more interesting,
-  // but this is not needed.
-  // Add the constraint that S(1, 0) = 1.
-  prog.AddBoundingBoxConstraint(1, 1, S(1, 0));
-  // Minimize S(0, 0) + S(1, 1).
-  prog.AddLinearCost(S(0, 0) + S(1, 1));
-  // Now solve the program.
+  auto Q = prog.NewSymmetricContinuousVariables<3>("Q");
+  auto psd_constraint = prog.AddPositiveSemidefiniteConstraint(Q);
+
+  prog.AddLinearConstraint(Q(0,0), 0, 0);
+  prog.AddLinearConstraint(Q(0,1), 0, 0);
+  prog.AddLinearConstraint(Q(1,1)+2*Q(1,2), 1, 1);
+  prog.AddLinearConstraint(Q(0,2), 0, 0);
+  prog.AddLinearConstraint(Q(2,2), 1, 1);
+
   prog.Solve();
-  // Retrieve the solution of matrix S.
-  auto S_value = prog.GetSolution(S);
-  // Compute the eigen values of the solution, to see if they are
-  // all non-negative.
-  //  Eigen::Vector4d S_stacked;
-  //  S_stacked << S_value.col(0), S_value.col(1);
-  //  Eigen::VectorXd S_eigen_values;
-  //  psd_constraint->Eval(S_stacked, S_eigen_values);
-  std::cout << "S solution is: " << S_value << std::endl;
-  //  std::cout << "The eigen values of S are " << S_eigen_values << std::endl;
+  std::cout << "The Gram Matrix is: " << prog.GetSolution(Q) << std::endl;
+
+  return 0;
+}
+*/
+
+int sos_decomposition2() {
+  std::cout << "sos_decomposition1()" << std::endl;
+
+  MathematicalProgram prog;
+  auto x = prog.NewIndeterminates(1,"x");
+  Expression x0{x(0)};  // TODO(FischerGundlach) add pow(const var&, const int&)
+  Expression f = pow(x0,4) + pow(x0,2);
+
+  auto Q = prog.NewSymmetricContinuousVariables<3>("Q");
+  auto psd_constraint = prog.AddPositiveSemidefiniteConstraint(Q);
+  Expression sos_poly = Q(0,0) + 2*Q(0,1)*x0 + (Q(1,1)+2*Q(1,2))*pow(x0,2) + Q(2,0)*pow(x0,3) + Q(2,2)*pow(x0,4);
+
+  Variables x_vars{x(0)};
+  MonomialAsExpressionToCoefficientMap DecomposePolynomialIntoExpression()
+
+
+      (f-sos_poly,{x(0)});
+
+/*  prog.AddLinearConstraint(Q(0,0), 0, 0);
+  prog.AddLinearConstraint(Q(1,0), 0, 0);
+  prog.AddLinearConstraint(Q(1,1)+2*Q(1,2), 1, 1);
+  prog.AddLinearConstraint(Q(2,0), 0, 0);
+  prog.AddLinearConstraint(Q(2,2), 1, 1);*/
+
+  prog.Solve();
+  std::cout << "The Gram Matrix is: " << prog.GetSolution(Q) << std::endl;
+
+//  auto x = prog.NewIndeterminates(3,"x");
+//  std::cout << x.transpose()*(Q_value*x) << std::endl;
+//
+//  auto mono = Monomial(Q(0,0));
+//  auto monoSquare = mono*mono;
+//  auto monoExpression = mono*Q(0,0);
 
   return 0;
 }
@@ -53,14 +80,7 @@ int psd_example() {
 int main() {
   std::cout << "runs executable.cc" << std::endl;
 
-
-  //  MathematicalProgram prog;
-  //  auto z = prog.NewIndeterminates(3, "z");
-  //  auto x = prog.NewContinuousVariables(4, "x");
-  //  drake::symbolic::Expression expression = x(0) + 2 * x(1);
-  //  auto map = DecomposePolynomialIntoExpression(expression);
-
-  drake::solvers::executable::psd_example();
+  drake::solvers::executable::sos_decomposition2();
 
   return 0;
 }
