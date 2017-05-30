@@ -3,7 +3,7 @@ be removed from git when the branch is commited*/
 
 #include <iostream>
 #include "mathematical_program.h"
-#include "mosek_solver.h"
+#include "drake/common/monomial.h"
 //#include "drake/common/symbolic_expression.h"
 
 using namespace drake::solvers;
@@ -47,11 +47,16 @@ int sos_decomposition2() {
   auto psd_constraint = prog.AddPositiveSemidefiniteConstraint(Q);
   Expression sos_poly = Q(0,0) + 2*Q(0,1)*x0 + (Q(1,1)+2*Q(1,2))*pow(x0,2) + Q(2,0)*pow(x0,3) + Q(2,2)*pow(x0,4);
 
-  Variables x_vars{x(0)};
-  MonomialAsExpressionToCoefficientMap DecomposePolynomialIntoExpression()
+  MonomialAsExpressionToCoefficientMap map = DecomposePolynomialIntoExpression(f-sos_poly,{x(0)});
 
+  for (auto& x: map) {
+    std::cout << x.first << ": " << x.second << std::endl;
+  }
 
-      (f-sos_poly,{x(0)});
+  for (auto& x: map) {
+    prog.AddLinearConstraint(x.second, 0, 0);
+  }
+
 
 /*  prog.AddLinearConstraint(Q(0,0), 0, 0);
   prog.AddLinearConstraint(Q(1,0), 0, 0);
