@@ -19,6 +19,7 @@
 #include "drake/common/drake_copyable.h"
 #include "drake/common/dummy_value.h"
 #include "drake/common/hash.h"
+//#include "drake/common/monomial.h"
 #include "drake/common/number_traits.h"
 #include "drake/common/polynomial.h"
 #include "drake/common/symbolic_environment.h"
@@ -697,6 +698,11 @@ typename std::enable_if<
 operator*(const MatrixL& lhs, const MatrixR& rhs) {
   return lhs.template cast<Expression>() * rhs.template cast<Expression>();
 }
+
+/*// NOLINTNEXTLINE(runtime/references) per C++ standard signature.
+Expression& operator*=(Expression& lhs, const Monomial& rhs);
+Expression operator*(Expression lhs, const Monomial& rhs);
+Expression operator*(const Monomial& lhs, Expression rhs);*/
 
 }  // namespace symbolic
 

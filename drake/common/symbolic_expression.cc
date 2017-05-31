@@ -16,6 +16,7 @@
 #include "drake/common/symbolic_environment.h"
 #include "drake/common/symbolic_expression_cell.h"
 #include "drake/common/symbolic_formula.h"
+//#include "drake/common/monomial.h"
 #include "drake/common/symbolic_variable.h"
 #include "drake/common/symbolic_variables.h"
 
@@ -802,9 +803,21 @@ Expression operator/(Expression lhs, const Variable& rhs) { return lhs /= rhs; }
 Expression operator/(const Variable& lhs, const Expression& rhs) {
   return Expression(lhs) / rhs;
 }
-
 Expression operator+(const Variable& var) { return Expression{var}; }
 Expression operator-(const Variable& var) { return -Expression{var}; }
+
+/*// NOLINTNEXTLINE(runtime/references) per C++ standard signature.
+Expression& operator*=(Expression& lhs, const Monomial& rhs) {
+  return lhs *= Expression{rhs};
+}
+// TODO(FischerGundlach): This function signature already exists. Do we need it?
+// Expression operator*(const Monomial& lhs, const Monomial& rhs) {
+//   return Expression{lhs} * Expression{rhs};
+// }
+Expression operator*(Expression lhs, const Monomial& rhs) { return lhs *= rhs; }
+Expression operator*(const Monomial& lhs, Expression rhs) { return rhs *= lhs; }*/
+
+
 
 MatrixX<Expression> Jacobian(const Eigen::Ref<const VectorX<Expression>>& f,
                              const vector<Variable>& vars) {
