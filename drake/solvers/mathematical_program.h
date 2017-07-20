@@ -34,6 +34,7 @@
 #include "drake/solvers/function.h"
 #include "drake/solvers/indeterminate.h"
 #include "drake/solvers/mathematical_program_solver_interface.h"
+#include "drake/solvers/sos_util.h"
 
 namespace drake {
 namespace solvers {
@@ -516,6 +517,9 @@ class MathematicalProgram {
    */
   std::pair<symbolic::Polynomial, Binding<PositiveSemidefiniteConstraint>>
   NewSosPolynomial(const symbolic::Variables& indeterminates, int degree);
+
+/*  std::pair<symbolic::Polynomial, Binding<PositiveSemidefiniteConstraint>>
+  NewSos_utilPolynomial(const symbolic::Polynomial& p);*/
 
   /**
    * Adds indeterminates, appending them to an internal vector of any
