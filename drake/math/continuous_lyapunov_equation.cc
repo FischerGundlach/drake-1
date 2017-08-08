@@ -14,7 +14,7 @@ using Eigen::Matrix2d;
 using Eigen::MatrixXd;
 using Eigen::VectorXcd;
 
-MatrixXd ContinuousLyapunovEquation(const Eigen::Ref<const MatrixXd>& A,
+MatrixXd RealContinuousLyapunovEquation(const Eigen::Ref<const MatrixXd>& A,
                                     const Eigen::Ref<const MatrixXd>& Q) {
   if (A.rows() != A.cols() || Q.rows() != Q.cols() || A.rows() != Q.rows()) {
     throw std::runtime_error("A and Q must be square and of equal size!");
@@ -35,9 +35,9 @@ MatrixXd ContinuousLyapunovEquation(const Eigen::Ref<const MatrixXd>& A,
   }
 
   if (static_cast<int>(A.cols()) == 1) {
-    return internal::Solve1By1ContinuousLyapunovEquation(A, Q);
+    return internal::Solve1By1RealContinuousLyapunovEquation(A, Q);
   } else if (static_cast<int>(A.cols()) == 2) {
-    return internal::Solve2By2ContinuousLyapunovEquation(A, Q);
+    return internal::Solve2By2RealContinuousLyapunovEquation(A, Q);
   } else {
     // Transform into S'*X_bar + X_bar*S = -Q_bar, where A = U*S*U'.
     Eigen::RealSchur<MatrixXd> schur(A);
@@ -48,7 +48,7 @@ MatrixXd ContinuousLyapunovEquation(const Eigen::Ref<const MatrixXd>& A,
     MatrixXd Q_bar{U.transpose() * Q * U};
 
     return (U.transpose() *
-            internal::SolveReducedContinuousLyapunovEquation(S, Q_bar) * U);
+            internal::SolveReducedRealContinuousLyapunovEquation(S, Q_bar) * U);
   }
 }
 
@@ -58,14 +58,14 @@ using Eigen::Matrix3d;
 using Eigen::Vector3d;
 using Eigen::VectorXd;
 
-Vector1d Solve1By1ContinuousLyapunovEquation(
+Vector1d Solve1By1RealContinuousLyapunovEquation(
     const Eigen::Ref<const Vector1d>& A, const Eigen::Ref<const Vector1d>& Q) {
   std::cout << "Matrix A: " << A << std::endl;
   std::cout << "Matrix Q: " << Q << std::endl;
   return Vector1d(-Q(0) / (2 * A(0)));
 }
 
-Matrix2d Solve2By2ContinuousLyapunovEquation(
+Matrix2d Solve2By2RealContinuousLyapunovEquation(
     const Eigen::Ref<const Matrix2d>& A, const Eigen::Ref<const Matrix2d>& Q) {
   DRAKE_DEMAND(
       is_approx_equal_abstol(Q.block(1, 0, 1, 1), Q.block(0, 1, 1, 1), 1e-10));
@@ -95,16 +95,16 @@ Matrix2d Solve2By2ContinuousLyapunovEquation(
   return X;
 }
 
-MatrixXd SolveReducedContinuousLyapunovEquation(
+MatrixXd SolveReducedRealContinuousLyapunovEquation(
     const Eigen::Ref<const MatrixXd>& S,
     const Eigen::Ref<const MatrixXd>& Q_bar) {
   std::cout << "Matrix S: " << S << std::endl;
   std::cout << "Matrix Q_bar: " << Q_bar << std::endl;
   int m{static_cast<int>(S.rows())};
   if (m == 1) {
-    return Solve1By1ContinuousLyapunovEquation(S, Q_bar);
+    return Solve1By1RealContinuousLyapunovEquation(S, Q_bar);
   } else if (m == 2) {
-    return Solve2By2ContinuousLyapunovEquation(S, Q_bar);
+    return Solve2By2RealContinuousLyapunovEquation(S, Q_bar);
   } else {
     // Notation & partition adapted from SB03MD:
     //        (s    s')      (q   q')      (x   x')
@@ -149,7 +149,7 @@ MatrixXd SolveReducedContinuousLyapunovEquation(
     if (n == 1) {
       std::cout << "In n == 1!" << std::endl;
       // solving equation 3.1
-      x_bar_11 << Solve1By1ContinuousLyapunovEquation(s_11, q_bar_11);
+      x_bar_11 << Solve1By1RealContinuousLyapunovEquation(s_11, q_bar_11);
       // solving equation 3.2
       MatrixXd lhs{S_1.transpose() +
                    MatrixXd::Identity(S_1.cols(), S_1.rows()) * s_11(0)};
@@ -157,7 +157,7 @@ MatrixXd SolveReducedContinuousLyapunovEquation(
       x_bar << lhs.colPivHouseholderQr().solve(rhs);
     } else {
       std::cout << "In n == 2!" << std::endl;
-      x_bar_11 << Solve2By2ContinuousLyapunovEquation(s_11, q_bar_11);
+      x_bar_11 << Solve2By2RealContinuousLyapunovEquation(s_11, q_bar_11);
       // solving equation 3.2
       // The equation reads as S_1'*x_bar + x_bar*s_11 = -(q_bar+s*x_bar_11),
       // where S_1 \in R^(m-2)x(m-2); x_bar, q_bar, s \in R^(m-2)x2 and s_11,
@@ -235,7 +235,7 @@ MatrixXd SolveReducedContinuousLyapunovEquation(
     std::cout << "Matrix S_1: " << S_1 << std::endl;
     std::cout << "Matrix Q_new: " << Q_new << std::endl;
     X_bar << x_bar_11, x_bar.transpose(), x_bar,
-        SolveReducedContinuousLyapunovEquation(S_1, Q_new);
+        SolveReducedRealContinuousLyapunovEquation(S_1, Q_new);
     std::cout << "Return X_bar: " << X_bar << std::endl;
     return X_bar;
   }

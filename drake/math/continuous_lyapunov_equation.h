@@ -34,7 +34,7 @@ namespace math {
  *
  */
 
-Eigen::MatrixXd ContinuousLyapunovEquation(
+Eigen::MatrixXd RealContinuousLyapunovEquation(
     const Eigen::Ref<const Eigen::MatrixXd>& A,
     const Eigen::Ref<const Eigen::MatrixXd>& Q);
 
@@ -42,14 +42,14 @@ namespace internal {
 
 // Subroutines which help special cases.
 
-Vector1d Solve1By1ContinuousLyapunovEquation(
+Vector1d Solve1By1RealContinuousLyapunovEquation(
     const Eigen::Ref<const Vector1d>& A, const Eigen::Ref<const Vector1d>& Q);
 
-Eigen::Matrix2d Solve2By2ContinuousLyapunovEquation(
+Eigen::Matrix2d Solve2By2RealContinuousLyapunovEquation(
     const Eigen::Ref<const Eigen::Matrix2d>& A,
     const Eigen::Ref<const Eigen::Matrix2d>& Q);
 
-Eigen::MatrixXd SolveReducedContinuousLyapunovEquation(
+Eigen::MatrixXd SolveReducedRealContinuousLyapunovEquation(
     const Eigen::Ref<const Eigen::MatrixXd>& A,
     const Eigen::Ref<const Eigen::MatrixXd>& Q);
 
